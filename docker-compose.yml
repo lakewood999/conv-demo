@@ -1,0 +1,18 @@
+version: "3.8"
+services:
+  web:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - predictor
+    ports:
+      - "5001:8001"
+  predictor:
+    image: tensorflow/serving
+    restart: unless-stopped
+    volumes:
+      - ./model:/models/model/1
+volumes:
+  model: {}

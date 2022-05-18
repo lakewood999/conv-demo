@@ -1,0 +1,152 @@
+<!--
+	Copyright 2022 Steven Su
+
+	This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+	This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+	You should have received a copy of the GNU Affero General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
+-->
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+		<link href="static/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script src="/static/fabric.min.js"></script>
+        <title>Convolutions, Filters, and Neural Networks Demo Site</title>
+        <style>
+            .canvas-container {
+                margin: auto;
+            }
+			canvas {
+				border: 1px solid black;
+			}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+		    <div class="pt-5 pb-3 text-center">
+		        <h1>Convolutions, Filters, and Neural Networks Demos</h1>
+		        <p class="lead">This site provides a couple of demo applications to demonstrate the workings of filters using the convolution operation and a basic MNIST-trained convolutional neural network.</p>
+		    </div>
+		</div>
+		<div class="container center mb-3">
+			<h3>Filter Demo</h3>
+			<div class="container mb-3 row">
+				<div class="col">
+					<div class="mb-3">
+						<label class="fw-bold">Filter size:</label>
+						<select class="form-select" id="filter-size-select">
+							<option value="2">2</option>
+							<option selected value="3">3</option>
+							<option value="4">4</option>
+							<option value="5">5</option>
+						</select>
+					</div>
+					<div id="3-sample" class="">
+						<p class="fw-bold">Sample Filters (click to set)</p>
+						<button class="btn btn-light" id="3-by-3-sharpen">Sharpen Filter</button>
+						<button class="btn btn-light" id="3-by-3-ridge">Ridge Filter</button>
+						<button class="btn btn-light" id="3-by-3-box">Box Blur Filter</button>
+						<button class="btn btn-light" id="3-by-3-sobelx">Sobel X Filter</button>
+						<button class="btn btn-light" id="3-by-3-sobely">Sobel Y Filter</button>
+					</div>
+					<div id="no-sample" style="display:none;">
+						<p class="fw-bold">Sample Filters (click to set)</p>
+						<p>Sorry, no samples are available for this filter size. Feel free to try your own!</p>
+					</div>
+				</div>
+				<div class="col">
+					<label class="fw-bold">Kernel matrix:</label>
+					<div id="kernel-container" class="mb-3 container">
+						<div class="row"><div class="col-sm"><input type="number" class="form-control" id="kernel-input-0-0" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-0-1" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-0-2" value="0"></div></div><div class="row"><div class="col-sm"><input type="number" class="form-control" id="kernel-input-1-0" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-1-1" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-1-2" value="0"></div></div><div class="row"><div class="col-sm"><input type="number" class="form-control" id="kernel-input-2-0" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-2-1" value="0"></div><div class="col-sm"><input type="number" class="form-control" id="kernel-input-2-2" value="0"></div></div>
+					</div>
+					<p>Note: refer to this <a href="https://en.wikipedia.org/wiki/Kernel_(image_processing)">site</a> for a list for some additional filters to mess around with. There are also some built-in filters available on the left.</p>
+				</div>
+			</div>
+			<hr class="mb-3"/>
+			<div class="container">
+				<div class="w-100 mb-3">
+					<p>Upload an image of your choice (pull a random image from <a href="https://www.freeimages.com/" target="_blank">here</a> for example; click <a href="/static/architecture.jpg" download>here</a> (building) and <a href="/static/bunny.png" download>here</a> (bunny) to download suggested images). A preview of your chosen image will appear below. Note that some filters are harder to see than others.</p>
+					<div id="image-upload-container mb-3">
+						<label>Image upload:</label>
+						<input type="file" class="form-control mb-3" id="image-upload">
+						<input type="submit" class="btn btn-primary" value="Convolve Image" id="convolve-submit"/>
+					</div>
+					<div class="container row mt-3 justify-content-md-center">
+						<div style="display: none;" id="preview-box" class="scroll col-4">
+							<p class="fw-bold text-center">Image Preview</p>
+							<p class="text-center">
+								<img class="mw-100 mh-100" id="preview"/>
+							</p>
+						</div>
+						<div style="display: none;" id="results-box" class="scroll col-4">
+							<p class="fw-bold text-center">Convolved Image</p>
+							<p class="text-center">
+								<img class="mw-100 mh-100" id="final-image"/>
+							</p>
+						</div>
+					</div>	
+				</div>
+			</div>
+		</div>
+		<div class="container center mb-3">
+			<h3>Neural Network Demo</h3>
+			<div class="container mb-3 row">
+				<div class="col">
+					<p class="text-center">This demo demonstrates the predictions of a convolutional neural network trained on the classic MNIST hand-drawn digit dataset. It is quite accurate although it is definitely fallible and tends to confuse some digits such as 4 and 9.</p>
+					<p class="text-center">
+						<button class="btn btn-primary" id="clear-canvas">Reset Canvas</button>
+						<button class="btn btn-primary" id="predict-canvas">Predict Number</button>
+					</p>
+					<canvas id="canvas" style="width: 336px; height: 336px;"></canvas>
+					<canvas id="internal-scaled-canvas" width="28px" height="28px" style="display: none;"></canvas>
+				</div>
+				<div class="col">
+					<h5>Results</h5>
+					<div id="prediction-empty">
+						<p>Draw a number between 0 and 9 on the box to the left and hit "Predict Number" to generate a response from the model! The response will show the number the model is most confident the one in the drawing is along with a table of probabilities for all possible numbers.</p>
+					</div>
+					<div id="prediction-loading" style="display: none;">
+						<div class="spinner-border" role="status">
+							<span class="sr-only">Loading...</span>
+						</div>
+					</div>
+					<div id="prediction-section" style="display: none;">
+						<p><b>Predicted number: </b><span id="final-number"></span></p>
+						<table class="table">
+							<thead class="table-dark">
+								<tr>
+									<th scope="col">Number</th>
+									<th scope="col">Probability</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr id="probability-0"><td id="probability-0-key"></td><td id="probability-0-value"></td></tr>
+								<tr id="probability-1"><td id="probability-1-key"></td><td id="probability-1-value"></td></tr>
+								<tr id="probability-2"><td id="probability-2-key"></td><td id="probability-2-value"></td></tr>
+								<tr id="probability-3"><td id="probability-3-key"></td><td id="probability-3-value"></td></tr>
+								<tr id="probability-4"><td id="probability-4-key"></td><td id="probability-4-value"></td></tr>
+								<tr id="probability-5"><td id="probability-5-key"></td><td id="probability-5-value"></td></tr>
+								<tr id="probability-6"><td id="probability-6-key"></td><td id="probability-6-value"></td></tr>
+								<tr id="probability-7"><td id="probability-7-key"></td><td id="probability-7-value"></td></tr>
+								<tr id="probability-8"><td id="probability-8-key"></td><td id="probability-8-value"></td></tr>
+								<tr id="probability-9"><td id="probability-9-key"></td><td id="probability-9-value"></td></tr>
+							</tbody>
+						</table>						  
+					</div>
+				</div>
+			</div>
+		</div>
+		<footer class="text-muted">
+			<div class="container">
+			  	<p>&copy; 2022 Steven Su</p>
+				  <p>This site is open-sourced at my <a href="https://git.stevensu.dev/lakewood999/linalg-game">GitLab</a></p>
+			</div>
+		</footer>	  
+        <script src="static/convolution.js"></script>
+		<script src="static/mnist.js"></script>
+    </body>
+</html>
