@@ -20,7 +20,6 @@ COPY static/ ./static
 COPY templates/ ./templates
 COPY LICENSE ./
 COPY main.py ./
-RUN ls ./
 
 EXPOSE 8001
 
