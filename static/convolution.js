@@ -119,6 +119,10 @@ $("#3-by-3-sobely").click(function() {
 })
 
 $("#convolve-submit").click(function() {
+    $("#results-box").show();
+    $("#conv-loading").show();
+    $("#final-image").hide();
+    $("#convolve-submit").attr("disabled", true);
     var formData = new FormData();
     var matrixArray = [];
     for (var i = 0; i < filterSize; i++) {
@@ -139,8 +143,9 @@ $("#convolve-submit").click(function() {
         type: 'POST',
         success: function(data){
             $("#final-image").attr("src","data:image/jpeg;base64,"+data);
-            console.log(data);
-            $("#results-box").show();
+            $("#conv-loading").hide();
+            $("#final-image").show();
+            $("#convolve-submit").attr("disabled", false);
         }
     });
 });

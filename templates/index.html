@@ -85,7 +85,8 @@
 						<div style="display: none;" id="results-box" class="scroll col-4">
 							<p class="fw-bold text-center">Convolved Image</p>
 							<p class="text-center">
-								<img class="mw-100 mh-100" id="final-image"/>
+								<div style="display: none;" id="conv-loading" class="spinner-border" role="status"></div>
+								<img style="display: none;" class="mw-100 mh-100" id="final-image"/>
 							</p>
 						</div>
 					</div>	
@@ -110,8 +111,7 @@
 						<p>Draw a number between 0 and 9 on the box to the left and hit "Predict Number" to generate a response from the model! The response will show the number the model is most confident the one in the drawing is along with a table of probabilities for all possible numbers.</p>
 					</div>
 					<div id="prediction-loading" style="display: none;">
-						<div class="spinner-border" role="status">
-						</div>
+						<div class="spinner-border" role="status"></div>
 					</div>
 					<div id="prediction-section" style="display: none;">
 						<p><b>Predicted number: </b><span id="final-number"></span></p>
